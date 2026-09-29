@@ -1,0 +1,17 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "QkblyT_LxZkXHqtSiui-t"
+uri = "file://.local/conversation-workspace/files/work/ALKIFAH_LMS_repair_bundle.zip"
+type = "unspecified"
+title = "ALKIFAH LMS Safe Windows Repair Bundle (Corrected)"
+description = "Corrected installer: unknown UI chunk checksums are safely left unchanged without rolling back compatible Python repairs. ZIP SHA-256: 2ac60e31bc90935a25956ccf756a7eeac2ab06e1e5d849766d55391a0e55d686"
+logical_id = "9d03bb6d-4fd7-4240-b911-dc5bab6dd195"
+content_hash = "sha256:2ac60e31bc90935a25956ccf756a7eeac2ab06e1e5d849766d55391a0e55d686"
+size = 206710
+mtime_ms = 1790417875911
+storage_uri = "gcs://replit-rams-assets-pike/rams/assets/conversation:ec32df38-c187-41cd-acca-91d87f3f65a8/9d03bb6d-4fd7-4240-b911-dc5bab6dd195/63f3a24b-036e-4935-9e4d-1e343442ade4"
+storage_version_token = "1790417892551301"
+content_type = "application/octet-stream"
+source_uri = "file://work/ALKIFAH_LMS_repair_bundle.zip"

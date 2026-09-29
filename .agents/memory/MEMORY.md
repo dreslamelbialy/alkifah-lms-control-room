@@ -1,0 +1,2 @@
+- [Provider configuration](provider-configuration.md) — user-owned AI keys stay server-side; provider availability and selection are safe client metadata.
+- [ALKIFAH upload boundaries](alkifah-upload-boundaries.md) — LMS uploads need a user-controlled handoff or a separate automation bridge; browser code cannot read arbitrary laptop paths.

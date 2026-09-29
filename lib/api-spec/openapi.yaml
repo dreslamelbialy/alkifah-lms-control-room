@@ -1,0 +1,597 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: API specification
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: dashboard
+    description: Dashboard summaries
+  - name: lessons
+    description: Lesson and material management
+  - name: assessments
+    description: Assessment generation and review
+  - name: homework
+    description: Homework sheet generation and review
+  - name: activity
+    description: Local activity history
+  - name: providers
+    description: AI provider configuration
+  - name: workflow
+    description: Safe LMS workflow preparation
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      description: Returns server health status
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+  /dashboard:
+    get:
+      operationId: getDashboard
+      tags: [dashboard]
+      summary: Get dashboard summary
+      responses:
+        "200":
+          description: Dashboard summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Dashboard"
+  /lessons:
+    get:
+      operationId: listLessons
+      tags: [lessons]
+      summary: List lessons
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [draft, ready, archived]
+      responses:
+        "200":
+          description: Lessons
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Lesson"
+    post:
+      operationId: createLesson
+      tags: [lessons]
+      summary: Create a lesson
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LessonInput"
+      responses:
+        "201":
+          description: Created lesson
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Lesson"
+  /lessons/{id}:
+    get:
+      operationId: getLesson
+      tags: [lessons]
+      summary: Get a lesson
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      responses:
+        "200":
+          description: Lesson
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LessonDetail"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    patch:
+      operationId: updateLesson
+      tags: [lessons]
+      summary: Update a lesson
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LessonUpdate"
+      responses:
+        "200":
+          description: Updated lesson
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Lesson"
+    delete:
+      operationId: deleteLesson
+      tags: [lessons]
+      summary: Archive a lesson
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      responses:
+        "204":
+          description: Lesson archived
+  /lessons/{id}/materials:
+    post:
+      operationId: addLessonMaterial
+      tags: [lessons]
+      summary: Add material to a lesson
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MaterialInput"
+      responses:
+        "201":
+          description: Created material
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Material"
+  /assessments:
+    get:
+      operationId: listAssessments
+      tags: [assessments]
+      summary: List assessments
+      responses:
+        "200":
+          description: Assessments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Assessment"
+  /assessments/{id}:
+    get:
+      operationId: getAssessment
+      tags: [assessments]
+      summary: Get assessment
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      responses:
+        "200":
+          description: Assessment
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AssessmentDetail"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /assessments/generate:
+    post:
+      operationId: generateAssessment
+      tags: [assessments]
+      summary: Generate a five-question Easy assessment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AssessmentGenerateInput"
+      responses:
+        "201":
+          description: Generated assessment
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AssessmentDetail"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "503":
+          description: Provider unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /homework:
+    get:
+      operationId: listHomework
+      tags: [homework]
+      summary: List homework sheets
+      responses:
+        "200":
+          description: Homework sheets
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Homework"
+  /homework/{id}:
+    get:
+      operationId: getHomework
+      tags: [homework]
+      summary: Get homework sheet
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      responses:
+        "200":
+          description: Homework sheet
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HomeworkDetail"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /homework/generate:
+    post:
+      operationId: generateHomework
+      tags: [homework]
+      summary: Generate a homework sheet
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/HomeworkGenerateInput"
+      responses:
+        "201":
+          description: Generated homework sheet
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HomeworkDetail"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "503":
+          description: Provider unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /activity:
+    get:
+      operationId: listActivity
+      tags: [activity]
+      summary: List recent activity
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+            default: 12
+      responses:
+        "200":
+          description: Activity items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Activity"
+  /providers:
+    get:
+      operationId: listProviders
+      tags: [providers]
+      summary: List provider availability and defaults
+      responses:
+        "200":
+          description: Provider settings
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Provider"
+  /providers/settings:
+    patch:
+      operationId: updateProviderSettings
+      tags: [providers]
+      summary: Update the selected AI provider
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProviderSettingsInput"
+      responses:
+        "200":
+          description: Updated provider settings
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Provider"
+  /workflow/prepare:
+    post:
+      operationId: prepareWorkflow
+      tags: [workflow]
+      summary: Prepare a safe LMS workflow package
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WorkflowPrepareInput"
+      responses:
+        "200":
+          description: Workflow preparation checklist
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkflowPreparation"
+components:
+  parameters:
+    Id:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: integer
+        minimum: 1
+  responses:
+    BadRequest:
+      description: Invalid request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    NotFound:
+      description: Not found
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+    Lesson:
+      type: object
+      required: [id, title, course, status, materialCount, createdAt, updatedAt]
+      properties:
+        id: { type: integer }
+        title: { type: string }
+        course: { type: string }
+        level: { type: ["string", "null"] }
+        status:
+          type: string
+          enum: [draft, ready, archived]
+        materialCount: { type: integer }
+        assessmentCount: { type: integer }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    LessonDetail:
+      allOf:
+        - $ref: "#/components/schemas/Lesson"
+        - type: object
+          required: [materials]
+          properties:
+            materials:
+              type: array
+              items:
+                $ref: "#/components/schemas/Material"
+    LessonInput:
+      type: object
+      required: [title, course]
+      properties:
+        title: { type: string, minLength: 1 }
+        course: { type: string, minLength: 1 }
+        level: { type: ["string", "null"] }
+        status:
+          type: string
+          enum: [draft, ready]
+          default: draft
+    LessonUpdate:
+      type: object
+      properties:
+        title: { type: string, minLength: 1 }
+        course: { type: string, minLength: 1 }
+        level: { type: ["string", "null"] }
+        status:
+          type: string
+          enum: [draft, ready, archived]
+    Material:
+      type: object
+      required: [id, lessonId, name, kind, content, createdAt]
+      properties:
+        id: { type: integer }
+        lessonId: { type: integer }
+        name: { type: string }
+        kind:
+          type: string
+          enum: [text, document, link]
+        content: { type: string }
+        createdAt: { type: string, format: date-time }
+    MaterialInput:
+      type: object
+      required: [name, kind, content]
+      properties:
+        name: { type: string, minLength: 1 }
+        kind:
+          type: string
+          enum: [text, document, link]
+        content: { type: string }
+    Assessment:
+      type: object
+      required: [id, lessonId, lessonTitle, title, difficulty, questionCount, opensAt, closesAt, createdAt]
+      properties:
+        id: { type: integer }
+        lessonId: { type: integer }
+        lessonTitle: { type: string }
+        title: { type: string }
+        difficulty:
+          type: string
+          enum: [Easy, Medium, Hard]
+        questionCount: { type: integer }
+        provider: { type: string }
+        opensAt: { type: string, format: date-time }
+        closesAt: { type: string, format: date-time }
+        createdAt: { type: string, format: date-time }
+    AssessmentDetail:
+      allOf:
+        - $ref: "#/components/schemas/Assessment"
+        - type: object
+          required: [questions]
+          properties:
+            questions:
+              type: array
+              items:
+                $ref: "#/components/schemas/Question"
+    Question:
+      type: object
+      required: [id, prompt, options, answer, explanation]
+      properties:
+        id: { type: string }
+        prompt: { type: string }
+        options:
+          type: array
+          items: { type: string }
+        answer: { type: string }
+        explanation: { type: string }
+    AssessmentGenerateInput:
+      type: object
+      required: [lessonId]
+      properties:
+        lessonId: { type: integer, minimum: 1 }
+        provider:
+          type: string
+          enum: [gemini, openai, deepseek]
+        questionCount: { type: integer, minimum: 5, maximum: 5, default: 5 }
+    Homework:
+      type: object
+      required: [id, lessonId, lessonTitle, title, exerciseCount, provider, createdAt]
+      properties:
+        id: { type: integer }
+        lessonId: { type: integer }
+        lessonTitle: { type: string }
+        title: { type: string }
+        exerciseCount: { type: integer }
+        provider: { type: string }
+        createdAt: { type: string, format: date-time }
+    HomeworkDetail:
+      allOf:
+        - $ref: "#/components/schemas/Homework"
+        - type: object
+          required: [exercises]
+          properties:
+            exercises:
+              type: array
+              items:
+                $ref: "#/components/schemas/Exercise"
+    Exercise:
+      type: object
+      required: [id, prompt, answer]
+      properties:
+        id: { type: string }
+        prompt: { type: string }
+        answer: { type: string }
+    HomeworkGenerateInput:
+      type: object
+      required: [lessonId]
+      properties:
+        lessonId: { type: integer, minimum: 1 }
+        assessmentId: { type: ["integer", "null"] }
+        provider:
+          type: string
+          enum: [gemini, openai, deepseek]
+    Activity:
+      type: object
+      required: [id, action, label, createdAt]
+      properties:
+        id: { type: integer }
+        action: { type: string }
+        label: { type: string }
+        detail: { type: ["string", "null"] }
+        createdAt: { type: string, format: date-time }
+    Provider:
+      type: object
+      required: [id, label, available, selected, model]
+      properties:
+        id:
+          type: string
+          enum: [gemini, openai, deepseek]
+        label: { type: string }
+        available: { type: boolean }
+        selected: { type: boolean }
+        model: { type: string }
+    ProviderSettingsInput:
+      type: object
+      required: [provider]
+      properties:
+        provider:
+          type: string
+          enum: [gemini, openai, deepseek]
+        model: { type: ["string", "null"] }
+    WorkflowPrepareInput:
+      type: object
+      required: [lessonId]
+      properties:
+        lessonId: { type: integer, minimum: 1 }
+        assessmentId: { type: ["integer", "null"] }
+        homeworkId: { type: ["integer", "null"] }
+    WorkflowPreparation:
+      type: object
+      required: [lessonId, ready, checks, generatedAt]
+      properties:
+        lessonId: { type: integer }
+        ready: { type: boolean }
+        generatedAt: { type: string, format: date-time }
+        checks:
+          type: array
+          items:
+            $ref: "#/components/schemas/WorkflowCheck"
+    WorkflowCheck:
+      type: object
+      required: [id, label, status, detail]
+      properties:
+        id: { type: string }
+        label: { type: string }
+        status:
+          type: string
+          enum: [pass, warning, blocked]
+        detail: { type: string }
+    Dashboard:
+      type: object
+      required: [lessonCount, readyLessonCount, assessmentCount, homeworkCount, providerCount, recentActivity]
+      properties:
+        lessonCount: { type: integer }
+        readyLessonCount: { type: integer }
+        assessmentCount: { type: integer }
+        homeworkCount: { type: integer }
+        providerCount: { type: integer }
+        recentActivity:
+          type: array
+          items:
+            $ref: "#/components/schemas/Activity"
+    ErrorResponse:
+      type: object
+      required: [error]
+      properties:
+        error: { type: string }
+

@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "ALKIFAH LMS Control Room"
+description = "A local-first teacher control room for managing lesson materials, generating five-question easy assessments, creating homework sheets, and running safe LMS workflows with Gemini, GPT, or DeepSeek."
+version = "1.0.0"
+id = "artifacts/alkifah-lms-control-room"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 26139
+
+[services.development]
+run = "pnpm --filter @workspace/alkifah-lms-control-room run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/alkifah-lms-control-room", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/alkifah-lms-control-room/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "26139"
+BASE_PATH = "/"
